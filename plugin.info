@@ -1,0 +1,9 @@
+{
+	"title": "$:/plugins/inmysocks/randVal",
+	"description": "A random number generator for TW5",
+	"author": "inmysocks",
+	"version": "0.1.2",
+	"core-version": ">=5.0.8",
+	"source": "https://github.com/inmysocks/TW5-randVal",
+	"plugin-type": "plugin"
+}
