@@ -83,35 +83,22 @@ Trigger Actions Daemon
 	// This should be simple, it just takes each expression tiddler, evaluates its filter and then performs the actions on each tiddler returned by the filter.
 	// The probelm is I don't know how to evaluate a wikitext string from javascript.
 	function evaluateExpression(expressionTiddler) {
-		console.log("evaluateExpression");
-		console.log(expressionTiddler);
 		var expressionFilter = expressionTiddler.getFieldString("text"); // This is in a specific field in the expressionTiddler.
 		var fieldList = getTiddlerFields(expressionTiddler); // This lists all of the action fields in the expression tiddler
 		var actionList = getActionList(expressionTiddler, fieldList); // This lists the contents of all other fields of the expressionTiddler;
-		console.log("actionList");
-		console.log(actionList);
 
 		// Iterate through the tiddlers returned by the expressiotFilter and for each tiddler execute each action in the actionList.
 		var actionTiddlers = $tw.wiki.filterTiddlers(expressionFilter); // This lists the tiddlers acted upon.
-		console.log("actionTiddlers");
-		console.log(actionTiddlers);
 		for(var i=0; i<actionTiddlers.length; i++) {
 			var currentActionTiddler = $tw.wiki.getTiddler(actionTiddlers[i]); // How do we set currentActionTiddler as the current tiddler?
-			console.log("currentActionTiddler");
-			console.log(currentActionTiddler);
 			if(currentActionTiddler) {
 				for(var l=0; l<actionList.length; l++) {
 					var actionItem = actionList[l];
-					console.log("actionItem");
-					console.log(actionItem);
-
 					var parsed = $tw.wiki.parseText("text/vnd.tiddlywiki", actionList[l], {});
 					var widgets = $tw.wiki.makeWidget(parsed, {});
 					var container = $tw.fakeDocument.createElement("div");
-					console.log(container);
+					widgets.setVariable("currentTiddler", currentActionTiddler.getFieldString("title"));
 					widgets.render(container, null);
-					widgets.children[0].setVariable("currentTiddler", currentActionTiddler.getFieldString("title"));
-					console.log(widgets);
 					widgets.children[0].invokeActions({});
 				}
 			}
@@ -119,7 +106,6 @@ Trigger Actions Daemon
 	}
 
 	function triggerActionsFull() {
-		console.log("triggerActionsFull");
 		var CONFIGURATION_TIDDLER = "$:/plugins/inmysocks/TriggerActions/TriggerActionsSettingsTiddler";
 		var configurationTiddler = $tw.wiki.getTiddler(CONFIGURATION_TIDDLER);
 		var actionTag = configurationTiddler.getFieldString("action_tag");
