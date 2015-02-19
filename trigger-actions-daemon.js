@@ -24,10 +24,7 @@ Trigger Actions Daemon
 	var CONFIGURATION_TIDDLER = "$:/plugins/inmysocks/TriggerActions/TriggerActionsSettingsTiddler";
 	var configurationTiddler = $tw.wiki.getTiddler(CONFIGURATION_TIDDLER);
 
-	console.log("start");
-
 	exports.startup = function() {
-		console.log("start");
 		// Do all actions on startup.
 		triggerActionsFull();
 
@@ -38,8 +35,6 @@ Trigger Actions Daemon
 				triggerActionsFull();
 			} else {
 				//Get the action tag from the configuration tiddler
-//				var configurationTiddler = $tw.wiki.getTiddler(CONFIGURATION_TIDDLER);
-				console.log("here");
 				var actionTag = configurationTiddler.getFieldString("action_tag"); // Any tiddler with this tag will be an expression tiddler.
 				var tiddlersFilter = "[tag[" + actionTag + "]evaluate[true]!has[draft.of]]";
 				var expressionTiddlerList = $tw.wiki.filterTiddlers(tiddlersFilter);
@@ -51,20 +46,7 @@ Trigger Actions Daemon
 							// If the expression tiddler has changed, update its output.
 							if($tw.utils.hop(changes,expressionTiddlerList[j])) {
 								evaluateExpression(expressionTiddler);
-							} else {
-								// If any of the tiddlers listed in the expression tiddler change, update the expression tiddlers output.
-								var inputFilter = expressionTiddler.getFieldString("text","[is[system]!is[system]]");
-								console.log(inputFilter);
-								var tiddlerList = $tw.wiki.filterTiddlers(inputFilter);
-								if(tiddlerList.length !== 0) {
-									for (var k = 0; k < tiddlerList.length; k++) {
-										var tidTitle = tiddlerList[k];
-										if($tw.utils.hop(changes,tidTitle)) {
-											evaluateExpression(expressionTiddler);
-										}
-									}
-								}
-							}
+							} 
 						}
 					}
 				}
@@ -74,7 +56,6 @@ Trigger Actions Daemon
 
 	// This returns the content of all fields execpt: title, text, modified, created, creator, tags, evaluate
 	function getTiddlerFields(tiddler) {
-		console.log("getTiddlerFields");
 		var results = [];		
 		if(tiddler) {
 			for(var fieldName in tiddler.fields) {
@@ -83,13 +64,11 @@ Trigger Actions Daemon
 				}
 			}
 		}
-		console.log(results);
 		return results;
 	}
 
 	// This returns the content of all fields execpt: title, text, modified, created, creator, tags, evaluate
 	function getActionList(expressionTiddler, fieldList) {
-		console.log("getActionList");
 		var results = [];		
 		if(fieldList) {
 			for(var m =0; m < fieldList.length; m++) {
@@ -98,7 +77,6 @@ Trigger Actions Daemon
 				}
 			}
 		}
-		console.log(results);
 		return results;
 	}
 
@@ -121,11 +99,21 @@ Trigger Actions Daemon
 			var currentActionTiddler = $tw.wiki.getTiddler(actionTiddlers[i]); // How do we set currentActionTiddler as the current tiddler?
 			console.log("currentActionTiddler");
 			console.log(currentActionTiddler);
-			for(var l=0; l<actionList.length; l++) {
-				var actionItem = actionList[l];
-				console.log("actionItem");
-				console.log(actionItem);
-				$tw.wiki.parseText("text/vnd.tiddlywiki",actionItem,"");
+			if(currentActionTiddler) {
+				for(var l=0; l<actionList.length; l++) {
+					var actionItem = actionList[l];
+					console.log("actionItem");
+					console.log(actionItem);
+
+					var parsed = $tw.wiki.parseText("text/vnd.tiddlywiki", actionList[l], {});
+					var widgets = $tw.wiki.makeWidget(parsed, {});
+					var container = $tw.fakeDocument.createElement("div");
+					console.log(container);
+					widgets.render(container, null);
+					widgets.children[0].setVariable("currentTiddler", currentActionTiddler.getFieldString("title"));
+					console.log(widgets);
+					widgets.children[0].invokeActions({});
+				}
 			}
 		}
 	}
