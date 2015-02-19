@@ -18,10 +18,16 @@ Trigger Actions Daemon
 	exports.after = ["startup"];
 	exports.synchronous = true;
 
+	var Wiki = require("$:/core/modules/wiki.js");
+
 	// Configuration tiddler
 	var CONFIGURATION_TIDDLER = "$:/plugins/inmysocks/TriggerActions/TriggerActionsSettingsTiddler";
+	var configurationTiddler = $tw.wiki.getTiddler(CONFIGURATION_TIDDLER);
+
+	console.log("start");
 
 	exports.startup = function() {
+		console.log("start");
 		// Do all actions on startup.
 		triggerActionsFull();
 
@@ -32,9 +38,9 @@ Trigger Actions Daemon
 				triggerActionsFull();
 			} else {
 				//Get the action tag from the configuration tiddler
-				var configurationTiddler = $tw.wiki.getTiddler(CONFIGURATION_TIDDLER);
+//				var configurationTiddler = $tw.wiki.getTiddler(CONFIGURATION_TIDDLER);
+				console.log("here");
 				var actionTag = configurationTiddler.getFieldString("action_tag"); // Any tiddler with this tag will be an expression tiddler.
-				console.log(actionTag);
 				var tiddlersFilter = "[tag[" + actionTag + "]evaluate[true]!has[draft.of]]";
 				var expressionTiddlerList = $tw.wiki.filterTiddlers(tiddlersFilter);
 				//Iterate through the list of expression tidders and evaluate each one if there has been a change.
@@ -66,40 +72,67 @@ Trigger Actions Daemon
 		});
 	};
 
-	// This returns the content of all fields execpt: title, text, modified, created, creator
+	// This returns the content of all fields execpt: title, text, modified, created, creator, tags, evaluate
 	function getTiddlerFields(tiddler) {
+		console.log("getTiddlerFields");
 		var results = [];		
 		if(tiddler) {
 			for(var fieldName in tiddler.fields) {
-				if(fieldName != "title" && fieldName != "text" && fieldName != "modified" && fieldName != "created" && fieldName != "creator") {
+				if(fieldName != "title" && fieldName != "text" && fieldName != "modified" && fieldName != "created" && fieldName != "creator" && fieldName !="tags" && fieldName != "evaluate") {
 					$tw.utils.pushTop(results,fieldName);
 				}
 			}
 		}
+		console.log(results);
+		return results;
+	}
+
+	// This returns the content of all fields execpt: title, text, modified, created, creator, tags, evaluate
+	function getActionList(expressionTiddler, fieldList) {
+		console.log("getActionList");
+		var results = [];		
+		if(fieldList) {
+			for(var m =0; m < fieldList.length; m++) {
+				if(fieldList[m]) {
+					$tw.utils.pushTop(results,expressionTiddler.getFieldString(fieldList[m]));
+				}
+			}
+		}
+		console.log(results);
 		return results;
 	}
 
 	// This should be simple, it just takes each expression tiddler, evaluates its filter and then performs the actions on each tiddler returned by the filter.
 	// The probelm is I don't know how to evaluate a wikitext string from javascript.
 	function evaluateExpression(expressionTiddler) {
-		var expressionFilter = $tw.getFieldString("text"); // This is in a specific field in the expressionTiddler.
-		var actionList = getTiddlerFields(expressionTiddler); // This lists the contents of all other fields of the expressionTiddler;
+		console.log("evaluateExpression");
+		console.log(expressionTiddler);
+		var expressionFilter = expressionTiddler.getFieldString("text"); // This is in a specific field in the expressionTiddler.
+		var fieldList = getTiddlerFields(expressionTiddler); // This lists all of the action fields in the expression tiddler
+		var actionList = getActionList(expressionTiddler, fieldList); // This lists the contents of all other fields of the expressionTiddler;
+		console.log("actionList");
+		console.log(actionList);
 
 		// Iterate through the tiddlers returned by the expressiotFilter and for each tiddler execute each action in the actionList.
 		var actionTiddlers = $tw.wiki.filterTiddlers(expressionFilter); // This lists the tiddlers acted upon.
+		console.log("actionTiddlers");
+		console.log(actionTiddlers);
 		for(var i=0; i<actionTiddlers.length; i++) {
-			var currentActionTiddler = $tw.wiki.getTiddler(actionTiddlers[i]);
+			var currentActionTiddler = $tw.wiki.getTiddler(actionTiddlers[i]); // How do we set currentActionTiddler as the current tiddler?
+			console.log("currentActionTiddler");
+			console.log(currentActionTiddler);
 			for(var l=0; l<actionList.length; l++) {
-				var child = actionList[l];
-				var handled = false; // Is this how you do it? I have no idea.
-				if(child.invokeAction) { // && child.invokeAction(this,event)) {
-					handled = true;
-				}
+				var actionItem = actionList[l];
+				console.log("actionItem");
+				console.log(actionItem);
+				$tw.wiki.parseText("text/vnd.tiddlywiki",actionItem,"");
 			}
 		}
 	}
 
 	function triggerActionsFull() {
+		console.log("triggerActionsFull");
+		var CONFIGURATION_TIDDLER = "$:/plugins/inmysocks/TriggerActions/TriggerActionsSettingsTiddler";
 		var configurationTiddler = $tw.wiki.getTiddler(CONFIGURATION_TIDDLER);
 		var actionTag = configurationTiddler.getFieldString("action_tag");
 		var tiddlersFilter = "[tag[" + actionTag + "]evaluate[true]!has[draft.of]]";

@@ -1,9 +1,9 @@
 {
-	"title": "$:/plugins/inmysocks/randVal",
-	"description": "A random number generator for TW5",
+	"title": "$:/plugins/inmysocks/TriggerActions",
+	"description": "A daemon that will trigger actions widgets when a tiddler changes",
 	"author": "inmysocks",
-	"version": "0.1.2",
+	"version": "0.0.1",
 	"core-version": ">=5.0.8",
-	"source": "https://github.com/inmysocks/TW5-randVal",
+	"source": "https://github.com/inmysocks/TW5-TriggerActions",
 	"plugin-type": "plugin"
 }
