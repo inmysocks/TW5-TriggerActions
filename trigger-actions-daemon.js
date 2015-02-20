@@ -36,8 +36,8 @@ Trigger Actions Daemon
 				triggerActionsFull();
 			} else {
 				//Get the action tag from the configuration tiddler
-				var actionTag = configurationTiddler.getFieldString("action_tag"); // Any tiddler with this tag will be an expression tiddler.
-				var tiddlersFilter = "[tag[" + actionTag + "]evaluate[true]!has[draft.of]]";
+				var expressionTiddlerFilter = configurationTiddler.getFieldString("expression_tiddler_filter"); // Any tiddler with this tag will be an expression tiddler.
+				var tiddlersFilter = expressionTiddlerFilter + "+[evaluate[true]!has[draft.of]]";
 				var expressionTiddlerList = $tw.wiki.filterTiddlers(tiddlersFilter);
 				//Iterate through the list of expression tidders and evaluate each one if there has been a change.
 				if(expressionTiddlerList.length !== 0) {

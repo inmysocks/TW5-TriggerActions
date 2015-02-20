@@ -4,9 +4,9 @@ modified: 20150220042713333
 tags: $:/tags/ControlPanel
 title: $:/plugins/inmysocks/TriggerActions/Settings
 
-This is the tag that will identify a tiddler as an expression tiddler:
+Tiddlers returned by the filter will be considered expression tiddlers:
 
-<$edit-text tiddler='$:/plugins/inmysocks/TriggerActions/TriggerActionsSettingsTiddler' field='action_tag' class='tc-edit-texteditor'/>
+<$edit-text tiddler='$:/plugins/inmysocks/TriggerActions/TriggerActionsSettingsTiddler' field='expression_tiddler_filter' class='tc-edit-texteditor'/>
 
 Here is a list of all tiddlers currently marked as listened to so they can't be changed by the triggered actions. If it is no longer listed under any of the listen filters you can uncheck it here. trying to uncheck one that is currently listened to won't do anything.
 

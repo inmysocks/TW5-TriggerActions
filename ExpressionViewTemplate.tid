@@ -4,7 +4,12 @@ modified: 20150220033423737
 tags: $:/tags/ViewTemplate
 title: $:/plugins/inmysocks/TriggerActions/ExpressionViewTemplate
 
-<$list filter="[all[current]tag{$:/plugins/inmysocks/TriggerActions/TriggerActionsSettingsTiddler!!action_tag}]">
+\define thisViewTemplateFilter()
+$(ViewTemplateFilter)$+[is[current]]
+\end
+
+<$set name=ViewTemplateFilter value={{$:/plugins/inmysocks/TriggerActions/TriggerActionsSettingsTiddler!!expression_tiddler_filter}}>
+<$list filter=<<thisViewTemplateFilter>>>
 Any tiddlers that would trigger an action are ignored if they appear in the list returned by the action filter of ''ANY'' expression tiddler to prevent infinite loops.
 <br>
 <$checkbox tiddler=<<currentTiddler>> field=evaluate checked='true' unchecked='false'/> Set as active
@@ -35,3 +40,4 @@ Action:
 </$list>
 </table>
 </$list>
+</$set>
