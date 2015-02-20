@@ -45,7 +45,7 @@ Trigger Actions Daemon
 						var expressionTiddler = $tw.wiki.getTiddler(expressionTiddlerList[j]);
 						if(expressionTiddler) {
 							if(expressionTiddler.getFieldString("listen_target") !== "true") {
-								var fields = {expressionTiddler: expressionTiddler};
+								var fields = {};
 								fields["listen_target"] = "true";
 								$tw.wiki.addTiddler(new $tw.Tiddler(expressionTiddler,fields,undefined));
 							}
@@ -60,7 +60,7 @@ Trigger Actions Daemon
 									for (var p = 0; p < listenTiddlerList.length; p++) {
 										var currentListenTiddler = $tw.wiki.getTiddler(listenTiddlerList[p])
 										if(currentListenTiddler.getFieldString("listen_target") !== "true") {
-											var fields = {currentListenTiddler: currentListenTiddler};
+											var fields = {};
 											fields["listen_target"] = "true";
 											$tw.wiki.addTiddler(new $tw.Tiddler(currentListenTiddler,fields,undefined));
 										}
@@ -124,7 +124,9 @@ Trigger Actions Daemon
 						var container = $tw.fakeDocument.createElement("div");
 						widgets.setVariable("currentTiddler", currentActionTiddler.getFieldString("title"));
 						widgets.render(container, null);
-						widgets.children[0].invokeActions({});
+						if(widgets.children[0]) {
+							widgets.children[0].invokeActions({});
+						}
 					}
 				}
 			}

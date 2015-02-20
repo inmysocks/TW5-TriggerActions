@@ -17,8 +17,10 @@ Action filter (the actions are applied to the things returned by this filter whe
 <$edit-text field='action_filter' placeholder='Action Filter' class='tc-edit-texteditor'/>
 <br>
 ''Add action:''<br>
-Name: <$edit-text tiddler='$:/temp/TriggerActions/NewAction' field='name' class='tc-edit-texteditor' placeholder='Action Name'/><br>
-Action: <$edit-text tiddler='$:/temp/TriggerActions/NewAction' field='action' class='tc-edit-texteditor' placeholder='Action Statement'/>
+Name (must be a valid field name): 
+<$edit-text tiddler='$:/temp/TriggerActions/NewAction' field='name' class='tc-edit-texteditor' placeholder='Action Name'/><br>
+Action: 
+<$edit-text tiddler='$:/temp/TriggerActions/NewAction' field='action' class='tc-edit-texteditor' placeholder='Action Statement'/>
 
 <$button>Add
 <$action-setfield $tiddler=<<currentTiddler>> $field={{$:/temp/TriggerActions/NewAction!!name}} $value={{$:/temp/TriggerActions/NewAction!!action}}/>
