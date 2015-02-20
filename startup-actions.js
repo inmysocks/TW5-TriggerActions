@@ -50,7 +50,7 @@ Startup Actions Script thing
 					performAction(actionTiddlerList[k], widgets, container);
 				}
 			} else {
-				// If no filter for the action tiddlers is given
+				// If no filter for the action tiddlers is given just evaluate the expressions.
 				var expressionTiddlerTitle = expressionTiddler.getFieldString("title");
 				performAction(expressionTiddlerTitle, widgets, container);
 			}
