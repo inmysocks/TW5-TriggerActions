@@ -13,7 +13,7 @@ Startup Actions Script thing
 	"use strict";
 
 	// Export name and synchronous status
-	exports.name = "trigger-actions-daemon";
+	exports.name = "startup-actions";
 	exports.platforms = ["browser"];
 	exports.after = ["startup"];
 	exports.synchronous = true;
