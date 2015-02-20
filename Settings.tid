@@ -1,0 +1,9 @@
+caption: Trigger Action Settings
+created: 20150220042525921
+modified: 20150220042713333
+tags: 
+title: $:/plugins/inmysocks/TriggerActions/Settings
+
+This is the tag that will identify a tiddler as an expression tiddler:
+
+<$edit-text tiddler='$:/plugins/inmysocks/TriggerActions/TriggerActionsSettingsTiddler' field='action_tag' class='tc-edit-texteditor'/>
