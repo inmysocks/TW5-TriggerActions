@@ -38,14 +38,30 @@ Startup Actions Script thing
 	function evaluateExpression(expressionTiddler) {
 		if(expressionTiddler) {
 			// Only act if changing the current action tiddler will not trigger another set of actions.
-			var parsed = $tw.wiki.parseText("text/vnd.tiddlywiki", expressionTiddler.getFieldString("text"), {});
+			var stringPassed = "<$importvariables filter='[[$:/core/ui/PageMacros]] [all[shadows+tiddlers]tag[$:/tags/Macro]!has[draft.of]]'>"+expressionTiddler.getFieldString("text")+"</$importvariables>";
+			var parsed = $tw.wiki.parseText("text/vnd.tiddlywiki", stringPassed, {});
 			var widgets = $tw.wiki.makeWidget(parsed, {});
 			var container = $tw.fakeDocument.createElement("div");
-			widgets.setVariable("currentTiddler", expressionTiddler.getFieldString("title"));
-			widgets.render(container, null);
-			if(widgets.children[0]) {
-				widgets.children[0].invokeActions({});
+
+			// If a filter is given for the action tiddlers do the actions in each returned tiddler.
+			if(expressionTiddler.getFieldString("action_filter")) {
+				var actionTiddlerList = $tw.wiki.filterTiddlers(expressionTiddler.getFieldString("action_filter"));
+				for (var k = 0; k < actionTiddlerList.length; k++) {
+					performAction(actionTiddlerList[k], widgets, container);
+				}
+			} else {
+				// If no filter for the action tiddlers is given
+				var expressionTiddlerTitle = expressionTiddler.getFieldString("title");
+				performAction(expressionTiddlerTitle, widgets, container);
 			}
+		}
+	}
+
+	function performAction(tiddler, widgets, container) {
+		widgets.setVariable("currentTiddler", tiddler);
+		widgets.render(container, null);
+		if(widgets) {
+			widgets.invokeActions({});
 		}
 	}
 

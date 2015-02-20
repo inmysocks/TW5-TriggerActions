@@ -30,7 +30,6 @@ Trigger Actions Daemon
 
 		// Reset the values when any of the tiddlers change.
 		$tw.wiki.addEventListener("change",function(changes) {
-			console.log("here");
 			//If the configuration changes do a full refresh, otherwise just refresh the changed expression.
 			if($tw.utils.hop(changes, CONFIGURATION_TIDDLER)) {
 				triggerActionsFull();
