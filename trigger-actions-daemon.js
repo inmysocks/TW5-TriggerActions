@@ -146,7 +146,8 @@ Trigger Actions Daemon
 						container = $tw.fakeDocument.createElement("div");
 						widgets.setVariable("currentTiddler", actionTiddlers[i]);
 						widgets.render(container, null);
-						widgets.children[0].invokeActions({});
+						var widgetChild1 = widgets.children[0]; //This is to prevent infinite loops. I don't like how I did this.
+						widgetChild1.children[0].invokeActions({});
 					}
 				}
 			}
