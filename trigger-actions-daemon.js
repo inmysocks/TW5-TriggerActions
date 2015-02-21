@@ -59,7 +59,7 @@ Trigger Actions Daemon
 								if(listenTiddlerList.length !== 0) {
 									for (var p = 0; p < listenTiddlerList.length; p++) {
 										var currentListenTiddler = $tw.wiki.getTiddler(listenTiddlerList[p]);
-										if(currentListenTiddler.getFieldString("listen_target") !== "true") {
+										if(currentListenTiddler && currentListenTiddler.getFieldString("listen_target") !== "true") {
 											fields = {};
 											fields["listen_target"] = "true";
 											$tw.wiki.addTiddler(new $tw.Tiddler(currentListenTiddler,fields,undefined));
@@ -109,10 +109,10 @@ Trigger Actions Daemon
 		var expressionFilter = expressionTiddler.getFieldString("action_filter"); // This is in a specific field in the expressionTiddler.
 		var fieldList = getTiddlerFields(expressionTiddler); // This lists all of the action fields in the expression tiddler
 		var actionList = getActionList(expressionTiddler, fieldList); // This lists the contents of all other fields of the expressionTiddler;
-		var actionItem;
 		var parsed;
 		var widgets;
 		var container;
+		var stringPassed;
 
 		// I need to  have two things here, one for when the filter returns actual tiddlers, another for when the filter returns a list of non-tiddler values. How do I distinguish between them?
 		// Iterate through the values returned by the expressionFilter and for each value execute each action in the actionList.
@@ -124,38 +124,60 @@ Trigger Actions Daemon
 				// Only act if changing the current action tiddler will not trigger another set of actions.
 				if(currentActionTiddler.getFieldString("listen_target") !== "true") {
 					for(var l=0; l<actionList.length; l++) {
-						actionItem = actionList[l];
-						parsed = $tw.wiki.parseText("text/vnd.tiddlywiki", actionList[l], {});
-						widgets = $tw.wiki.makeWidget(parsed, {});
-						container = $tw.fakeDocument.createElement("div");
-						widgets.setVariable("currentTiddler", currentActionTiddler.getFieldString("title"));
-						widgets.render(container, null);
-						if(widgets) {
-							widgets.invokeActions({});
+						if(!changesListenTarget(actionList[l])) {
+							stringPassed = "<$importvariables filter='[[$:/core/ui/PageMacros]] [all[shadows+tiddlers]tag[$:/tags/Macro]!has[draft.of]]'>"+actionList[l]+"</$importvariables>";
+							parsed = $tw.wiki.parseText("text/vnd.tiddlywiki", stringPassed, {});
+							widgets = $tw.wiki.makeWidget(parsed, {});
+							container = $tw.fakeDocument.createElement("div");
+							widgets.setVariable("currentTiddler", actionTiddlers[i]);
+							widgets.render(container, null);
+							var widgetChild1 = widgets.children[0]; //This is to prevent infinite loops. I don't like how I did this.
+							widgetChild1.children[0].invokeActions({});
 						}
 					}
 				}
-			} /* else { //If the current value isn't a tiddler you don't have to worry about infinite loops. This isn't true, if the current value is a field in a tiddler you can get infinite loops. I can't add this part until I find a way around that.
+			}  else { 
+			//If the current value isn't a tiddler this has to be slightly different.
 				for(var p=0; p<actionList.length; p++) {
-					actionItem = actionList[p];
-					parsed = $tw.wiki.parseText("text/vnd.tiddlywiki", actionList[p], {});
-					widgets = $tw.wiki.makeWidget(parsed, {});
-					container = $tw.fakeDocument.createElement("div");
-					widgets.setVariable("currentTiddler", actionTiddlers[i]);
-					widgets.render(container, null);
-					if(widgets) {
-						widgets.invokeActions({});
+					if(!changesListenTarget(actionList[p])) {
+						stringPassed = "<$importvariables filter='[[$:/core/ui/PageMacros]] [all[shadows+tiddlers]tag[$:/tags/Macro]!has[draft.of]]'>"+actionList[p]+"</$importvariables>";
+						parsed = $tw.wiki.parseText("text/vnd.tiddlywiki", stringPassed, {});
+						widgets = $tw.wiki.makeWidget(parsed, {});
+						container = $tw.fakeDocument.createElement("div");
+						widgets.setVariable("currentTiddler", actionTiddlers[i]);
+						widgets.render(container, null);
+						widgets.children[0].invokeActions({});
 					}
 				}
-			}*/
+			}
 		}
+	}
+
+	// This checks to see if the actionTiddler variable in the current action widget is set to one of the listen targets and if so returns true, otherwise returns false.
+	function changesListenTarget(actionItem) {
+		// This is terrible, but it is the only way I can come up with that lets you both avoid infinite loops and use macros. I am sorry for this code.
+		var parsed = $tw.wiki.parseText("text/vnd.tiddlywiki", actionItem, {});
+		var widgets = $tw.wiki.makeWidget(parsed, {});
+		var container = $tw.fakeDocument.createElement("div");
+		widgets.setVariable("currentTiddler", actionItem);
+		widgets.render(container, null);
+		var widgetChild1 = widgets.children[0];
+		if(widgetChild1 && widgetChild1.children[0].actionTiddler) {
+			var listenTargets = $tw.wiki.filterTiddlers("[listen_target[true]]");
+			if(listenTargets.indexOf(widgetChild1.children[0].actionTiddler) === -1) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+		return true;
 	}
 
 	function triggerActionsFull() {
 		var CONFIGURATION_TIDDLER = "$:/plugins/inmysocks/TriggerActions/TriggerActionsSettingsTiddler";
 		var configurationTiddler = $tw.wiki.getTiddler(CONFIGURATION_TIDDLER);
-		var actionTag = configurationTiddler.getFieldString("action_tag");
-		var tiddlersFilter = "[tag[" + actionTag + "]evaluate[true]!has[draft.of]]";
+		var expressionTiddlerFilter = configurationTiddler.getFieldString("expression_tiddler_filter"); // Any tiddler with this tag will be an expression tiddler.
+		var tiddlersFilter = expressionTiddlerFilter + "+[evaluate[true]!has[draft.of]]";
 		var expressionTiddlerList = $tw.wiki.filterTiddlers(tiddlersFilter);
 		if(expressionTiddlerList.length !== 0) {
 			for (var j = 0; j < expressionTiddlerList.length; j++) {
