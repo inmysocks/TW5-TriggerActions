@@ -2,7 +2,7 @@
 	"title": "$:/plugins/inmysocks/TriggerActions",
 	"description": "A daemon that will trigger actions widgets when a tiddler changes",
 	"author": "inmysocks",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"core-version": ">=5.1.8",
 	"source": "https://github.com/inmysocks/TW5-TriggerActions",
 	"plugin-type": "plugin"

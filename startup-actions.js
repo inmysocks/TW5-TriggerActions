@@ -34,10 +34,10 @@ Startup Actions Script thing
 		}
 	};
 
-	// This should be simple, it just takes each expression tiddler and triggers all of the action widgets in its text field
+	// This should be simple, it just takes each expression tiddler and triggers all of the action widgets in its text field.
 	function evaluateExpression(expressionTiddler) {
 		if(expressionTiddler) {
-			// Only act if changing the current action tiddler will not trigger another set of actions.
+			// Import all the variables because the widget isn't part of the main tiddlywiki stuff so the global macros and similar things aren't loaded by default.
 			var stringPassed = "<$importvariables filter='[[$:/core/ui/PageMacros]] [all[shadows+tiddlers]tag[$:/tags/Macro]!has[draft.of]]'>"+expressionTiddler.getFieldString("text")+"</$importvariables>";
 			var parsed = $tw.wiki.parseText("text/vnd.tiddlywiki", stringPassed, {});
 			var widgets = $tw.wiki.makeWidget(parsed, {});
@@ -61,6 +61,10 @@ Startup Actions Script thing
 		widgets.setVariable("currentTiddler", tiddler);
 		widgets.render(container, null);
 		if(widgets) {
+			// Messages that are handled by the core don't work, others do as long as you put the proper handling widget around it.
+			if(widgets.message) {
+				widgets.dispatchEvent({type: widgets.message, param: widgets.param, tiddlerTitle: widgets.getVariable("currentTiddler")});
+			}
 			widgets.invokeActions({});
 		}
 	}
