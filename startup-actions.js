@@ -38,7 +38,7 @@ Startup Actions Script thing
 	function evaluateExpression(expressionTiddler) {
 		if(expressionTiddler) {
 			// Import all the variables because the widget isn't part of the main tiddlywiki stuff so the global macros and similar things aren't loaded by default.
-			var stringPassed = "<$importvariables filter='[[$:/core/ui/PageMacros]] [all[shadows+tiddlers]tag[$:/tags/Macro]!has[draft.of]]'>"+expressionTiddler.getFieldString("text")+"</$importvariables>";
+			var stringPassed = "<$importvariables filter='[[$:/core/ui/PageMacros]] [all[shadows+tiddlers]tag[$:/tags/Macro]!has[draft.of]] [[" + expressionTiddler.getFieldString("title") + "]]'>"+expressionTiddler.getFieldString("text")+"</$importvariables>";
 			var parsed = $tw.wiki.parseText("text/vnd.tiddlywiki", stringPassed, {});
 			var widgets = $tw.wiki.makeWidget(parsed, {});
 			var container = $tw.fakeDocument.createElement("div");
@@ -61,10 +61,10 @@ Startup Actions Script thing
 		widgets.setVariable("currentTiddler", tiddler);
 		widgets.render(container, null);
 		if(widgets) {
-			// Messages that are handled by the core don't work, others do as long as you put the proper handling widget around it.
-			if(widgets.message) {
+			// Messages that are handled by the core don't work, others do as long as you put the proper handling widget around it. This didn't fix the problem.
+/*			if(widgets.message) {
 				widgets.dispatchEvent({type: widgets.message, param: widgets.param, tiddlerTitle: widgets.getVariable("currentTiddler")});
-			}
+			}*/
 			widgets.invokeActions({});
 		}
 	}
