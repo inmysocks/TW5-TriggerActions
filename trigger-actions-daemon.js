@@ -127,7 +127,7 @@ Trigger Actions Daemon
 						if(!changesListenTarget(actionList[l])) {
 							stringPassed = "<$importvariables filter='[[$:/core/ui/PageMacros]] [all[shadows+tiddlers]tag[$:/tags/Macro]!has[draft.of]]'>"+actionList[l]+"</$importvariables>";
 							parsed = $tw.wiki.parseText("text/vnd.tiddlywiki", stringPassed, {});
-							widgets = $tw.wiki.makeWidget(parsed, {});
+							widgets = $tw.wiki.makeWidget(parsed, {parentWidget:$tw.rootWidget});
 							container = $tw.fakeDocument.createElement("div");
 							widgets.setVariable("currentTiddler", actionTiddlers[i]);
 							widgets.render(container, null);
@@ -142,7 +142,7 @@ Trigger Actions Daemon
 					if(!changesListenTarget(actionList[p])) {
 						stringPassed = "<$importvariables filter='[[$:/core/ui/PageMacros]] [all[shadows+tiddlers]tag[$:/tags/Macro]!has[draft.of]]'>"+actionList[p]+"</$importvariables>";
 						parsed = $tw.wiki.parseText("text/vnd.tiddlywiki", stringPassed, {});
-						widgets = $tw.wiki.makeWidget(parsed, {});
+						widgets = $tw.wiki.makeWidget(parsed, {parentWidget:$tw.rootWidget});
 						container = $tw.fakeDocument.createElement("div");
 						widgets.setVariable("currentTiddler", actionTiddlers[i]);
 						widgets.render(container, null);
