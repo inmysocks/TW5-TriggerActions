@@ -34,16 +34,17 @@ Trigger Actions Daemon
 			if($tw.utils.hop(changes, CONFIGURATION_TIDDLER)) {
 				triggerActionsFull();
 			} else {
-				//Get the action tag from the configuration tiddler
-				var expressionTiddlerFilter = configurationTiddler.getFieldString("expression_tiddler_filter"); // Any tiddler with this tag will be an expression tiddler.
+				//Get the action tag from the configuration tiddler and filter to get a list of expression tiddlers.
+				var expressionTiddlerFilter = configurationTiddler.getFieldString("expression_tiddler_filter");
 				var tiddlersFilter = expressionTiddlerFilter + "+[evaluate[true]!has[draft.of]]";
 				var expressionTiddlerList = $tw.wiki.filterTiddlers(tiddlersFilter);
 				var fields;
-				//Iterate through the list of expression tidders and evaluate each one if there has been a change.
+				//Iterate through the list of expression tidders and evaluate any that have changed.
 				if(expressionTiddlerList.length !== 0) {
 					for (var j = 0; j < expressionTiddlerList.length; j++) {
 						var expressionTiddler = $tw.wiki.getTiddler(expressionTiddlerList[j]);
 						if(expressionTiddler) {
+							// Label the current expression tiddler as a listen target if it isn't already labeled.
 							if(expressionTiddler.getFieldString("listen_target") !== "true") {
 								fields = {};
 								fields["listen_target"] = "true";
@@ -59,6 +60,7 @@ Trigger Actions Daemon
 								if(listenTiddlerList.length !== 0) {
 									for (var p = 0; p < listenTiddlerList.length; p++) {
 										var currentListenTiddler = $tw.wiki.getTiddler(listenTiddlerList[p]);
+										// Make sure all the listen targets are labeled correctly to prevent infinite loops.
 										if(currentListenTiddler && currentListenTiddler.getFieldString("listen_target") !== "true") {
 											fields = {};
 											fields["listen_target"] = "true";
@@ -90,7 +92,7 @@ Trigger Actions Daemon
 		return results;
 	}
 
-	// This returns the content of all fields execpt: title, text, modified, created, creator, tags, evaluate
+	// This returns the content of all fields in the fieldList.
 	function getActionList(expressionTiddler, fieldList) {
 		var results = [];		
 		if(fieldList) {
@@ -104,17 +106,17 @@ Trigger Actions Daemon
 	}
 
 	// This should be simple, it just takes each expression tiddler, evaluates its filter and then performs the actions on each tiddler returned by the filter.
-	// The probelm is I don't know how to evaluate a wikitext string from javascript.
 	function evaluateExpression(expressionTiddler) {
-		var expressionFilter = expressionTiddler.getFieldString("action_filter"); // This is in a specific field in the expressionTiddler.
-		var fieldList = getTiddlerFields(expressionTiddler); // This lists all of the action fields in the expression tiddler
-		var actionList = getActionList(expressionTiddler, fieldList); // This lists the contents of all other fields of the expressionTiddler;
+		// Get information from the expressionTiddler.
+		var expressionFilter = expressionTiddler.getFieldString("action_filter");
+		var fieldList = getTiddlerFields(expressionTiddler);
+		var actionList = getActionList(expressionTiddler, fieldList);
+
 		var parsed;
 		var widgets;
 		var container;
 		var stringPassed;
 
-		// I need to  have two things here, one for when the filter returns actual tiddlers, another for when the filter returns a list of non-tiddler values. How do I distinguish between them?
 		// Iterate through the values returned by the expressionFilter and for each value execute each action in the actionList.
 		var actionTiddlers = $tw.wiki.filterTiddlers(expressionFilter);
 		for(var i=0; i<actionTiddlers.length; i++) {
@@ -125,6 +127,7 @@ Trigger Actions Daemon
 				if(currentActionTiddler.getFieldString("listen_target") !== "true") {
 					for(var l=0; l<actionList.length; l++) {
 						if(!changesListenTarget(actionList[l])) {
+							// Variables have to be imported in order for macros to work.
 							stringPassed = "<$importvariables filter='[[$:/core/ui/PageMacros]] [all[shadows+tiddlers]tag[$:/tags/Macro]!has[draft.of]]'>"+actionList[l]+"</$importvariables>";
 							parsed = $tw.wiki.parseText("text/vnd.tiddlywiki", stringPassed, {});
 							widgets = $tw.wiki.makeWidget(parsed, {parentWidget:$tw.rootWidget});
@@ -137,9 +140,10 @@ Trigger Actions Daemon
 					}
 				}
 			}  else { 
-			//If the current value isn't a tiddler this has to be slightly different.
+			//If the current value isn't a tiddler it is handled differently.
 				for(var p=0; p<actionList.length; p++) {
 					if(!changesListenTarget(actionList[p])) {
+						// Variables have to be imported in order for macros to work.
 						stringPassed = "<$importvariables filter='[[$:/core/ui/PageMacros]] [all[shadows+tiddlers]tag[$:/tags/Macro]!has[draft.of]]'>"+actionList[p]+"</$importvariables>";
 						parsed = $tw.wiki.parseText("text/vnd.tiddlywiki", stringPassed, {});
 						widgets = $tw.wiki.makeWidget(parsed, {parentWidget:$tw.rootWidget});
@@ -174,10 +178,11 @@ Trigger Actions Daemon
 		return true;
 	}
 
+	// On startup make sure expressions are up to date.
 	function triggerActionsFull() {
 		var CONFIGURATION_TIDDLER = "$:/plugins/inmysocks/TriggerActions/TriggerActionsSettingsTiddler";
 		var configurationTiddler = $tw.wiki.getTiddler(CONFIGURATION_TIDDLER);
-		var expressionTiddlerFilter = configurationTiddler.getFieldString("expression_tiddler_filter"); // Any tiddler with this tag will be an expression tiddler.
+		var expressionTiddlerFilter = configurationTiddler.getFieldString("expression_tiddler_filter");
 		var tiddlersFilter = expressionTiddlerFilter + "+[evaluate[true]!has[draft.of]]";
 		var expressionTiddlerList = $tw.wiki.filterTiddlers(tiddlersFilter);
 		if(expressionTiddlerList.length !== 0) {
